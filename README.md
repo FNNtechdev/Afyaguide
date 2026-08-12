@@ -426,7 +426,7 @@ AfyaGuide aims to make healthcare-facility discovery more **accessible, understa
 
 # 👩🏽‍💻 Author
 
-**Faith Paul**  
+**Faith Njoroge & Michael Owor**  
 **Project:** AfyaGuide  
 **Focus:** Data Science · Healthcare Access · Responsible AI · Natural Language Processing
 
