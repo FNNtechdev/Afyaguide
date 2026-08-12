@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="AfyaGuide – Data-driven healthcare facility discovery for Kenya" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>AfyaGuide – Healthcare Facility Discovery Kenya</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <a href="#" class="logo" onclick="resetApp(); return false;">
+      <div class="logo-icon">A</div>
+      <div class="logo-text">Afya<span>Guide</span></div>
+    </a>
+    <div style="display:flex;align-items:center;gap:0.4rem;">
+      <span class="header-tag">Kenya</span>
+      <span class="data-badge" id="dataBadge">Loading data…</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero" id="searchSection">
+      <div class="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Data-driven facility discovery
+      </div>
+      <h1>Find the right healthcare facility near you</h1>
+      <p>Describe what you need in everyday language. We match you using the official facility list and a structured health-need taxonomy.</p>
+
+      <div class="safety-notice">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+          <strong>Responsible use</strong>
+          AfyaGuide is a facility-discovery tool, not a diagnostic service. It can make mistakes and facility information may change. Please verify important details with the facility or a qualified healthcare professional. If someone is in immediate danger, seek emergency care immediately (call 999).
+        </div>
+      </div>
+
+      <div class="search-card">
+        <div class="search-label">What healthcare service do you need?</div>
+        <textarea id="userQuery" rows="2" placeholder="e.g. I need HIV testing near me, or My child has had a high fever for three days…"></textarea>
+        <div class="examples">
+          <button type="button" class="example-chip" data-q="I need HIV testing">HIV testing</button>
+          <button type="button" class="example-chip" data-q="Family planning services">Family planning</button>
+          <button type="button" class="example-chip" data-q="Antenatal care for pregnancy">ANC / pregnancy</button>
+          <button type="button" class="example-chip" data-q="Child immunization">Child immunization</button>
+          <button type="button" class="example-chip" data-q="Emergency care for injury">Emergency / injury</button>
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <div class="filter-row">
+          <div class="location-full">
+            <div class="location-status" id="locationStatus">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Location not yet detected</span>
+            </div>
+            <button type="button" class="btn btn-location" id="btnLocation">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Use my current location
+            </button>
+          </div>
+          <div class="filter-group">
+            <label for="countySelect">County (optional)</label>
+            <select id="countySelect">
+              <option value="">Any county</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="distanceSelect">Search distance</label>
+            <select id="distanceSelect">
+              <option value="10">Search within 10 km</option>
+              <option value="20" selected>Search within 20 km</option>
+              <option value="30">Search within 30 km</option>
+              <option value="50">Search within 50 km</option>
+              <option value="100">Search within 100 km</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="primary-action">
+        <button type="button" class="btn btn-primary" id="btnSearch" disabled>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Find suitable facilities
+        </button>
+      </div>
+      <div class="data-status" id="dataStatus">Loading facility data and taxonomy…</div>
+    </section>
+
+    <div class="loading-state" id="loadingState">
+      <div class="spinner"></div>
+      <div class="loading-text">Matching your request to facilities…</div>
+      <div class="loading-sub">Using the health-need taxonomy and facility capability data</div>
+    </div>
+
+    <div class="emergency-notice" id="emergencyNotice">
+      <strong>Emergency situation detected</strong>
+      <p>If this is a life-threatening emergency, call 999 or go to the nearest hospital immediately. The facilities below may still help, but do not delay emergency care.</p>
+    </div>
+
+    <section class="results-section" id="resultsSection">
+      <button type="button" class="back-link" onclick="resetApp()">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        New search
+      </button>
+      <div class="recommendation-summary" id="recommendationSummary"></div>
+      <div id="facilityList"></div>
+      <div class="map-section" id="mapSection">
+        <div class="map-header">
+          <h3>Nearby facilities on map</h3>
+        </div>
+        <div id="map"></div>
+      </div>
+    </section>
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🏥</div>
+      <h3>No suitable facilities found</h3>
+      <p>We couldn’t find matching facilities within the selected area. Try increasing the search distance or choosing a different county.</p>
+      <button type="button" class="btn btn-secondary" onclick="resetApp()">Adjust search</button>
+    </div>
+
+    <div class="error-state" id="errorState">
+      <div class="empty-icon">⚠️</div>
+      <h3>Something went wrong</h3>
+      <p>We couldn’t complete the search right now. Please try again.</p>
+      <button type="button" class="btn btn-secondary" id="btnRetry">Try again</button>
+    </div>
+  </main>
+
+  <footer class="footer">
+    AfyaGuide uses the cleaned Kenya Master Health Facility List and a structured health-need taxonomy.<br>
+    Not a diagnostic service · Always verify details with the facility · Data may change
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <!-- App logic -->
+  <script src="app.js"></script>
+</body>
+</html>
