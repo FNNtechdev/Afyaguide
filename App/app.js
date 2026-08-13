@@ -705,16 +705,13 @@ function renderResults(data) {
         </div>
       </div>
       <div class="card-actions">
-        <button type="button" class="btn btn-directions btn-sm get-directions" data-lat="${f.lat}" data-lng="${f.lng}" data-name="${(f.name || '').replace(/"/g, '&quot;')}">
+        ${f.lat && f.lng ? `<button type="button" class="btn btn-directions btn-sm get-directions" data-lat="${f.lat}" data-lng="${f.lng}" data-name="${String(f.name || '').replace(/"/g, '&quot;')}">
           ${t('getDirections')}
-        </button>
+        </button>` : ''}
         ${f.url ? `<a class="btn btn-secondary btn-sm" href="${f.url}" target="_blank" rel="noopener">${t('officialPage')}</a>` : ''}
       </div>
     `;
     facilityList.appendChild(card);
-  });
-      }
-    });
   });
 
   document.querySelectorAll('.get-directions').forEach(btn => {
