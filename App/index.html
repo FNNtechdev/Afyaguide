@@ -6,27 +6,26 @@
   <meta name="description" content="AfyaGuide – Data-driven healthcare facility discovery for Kenya" />
   <meta name="theme-color" content="#0f766e" />
   <title>AfyaGuide – Healthcare Facility Discovery Kenya</title>
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-  <!-- App styles -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="bg-scene" aria-hidden="true"></div>
   <header class="header">
     <a href="#" class="logo" onclick="resetApp(); return false;">
       <div class="logo-icon">A</div>
       <div class="logo-text">Afya<span>Guide</span></div>
     </a>
-    <div style="display:flex;align-items:center;gap:0.4rem;">
+    <div class="header-right">
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button type="button" class="lang-btn active" data-lang="en">EN</button>
+        <button type="button" class="lang-btn" data-lang="sw">SW</button>
+      </div>
       <span class="header-tag">Kenya</span>
-      <span class="data-badge" id="dataBadge">Loading data…</span>
+      <span class="data-badge" id="dataBadge">…</span>
     </div>
   </header>
 
@@ -34,22 +33,34 @@
     <section class="hero" id="searchSection">
       <div class="hero-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        Data-driven facility discovery
+        <span id="heroBadgeText">Data-driven facility discovery</span>
       </div>
-      <h1>Find the right healthcare facility near you</h1>
-      <p>Describe what you need in everyday language. We match you using the official facility list and a structured health-need taxonomy.</p>
+      <h1 id="heroTitle">Find the right healthcare facility near you</h1>
+      <p id="heroSub">Describe what you need in everyday language. We match you using the official facility list and a structured health-need taxonomy.</p>
 
       <div class="safety-notice">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <div>
-          <strong>Responsible use</strong>
-          AfyaGuide is a facility-discovery tool, not a diagnostic service. It can make mistakes and facility information may change. Please verify important details with the facility or a qualified healthcare professional. If someone is in immediate danger, seek emergency care immediately (call 999).
+          <strong id="safetyTitle">Responsible use</strong>
+          <span id="safetyText">AfyaGuide is a facility-discovery tool, not a diagnostic service. It can make mistakes and facility information may change. Please verify important details with the facility or a qualified healthcare professional. If someone is in immediate danger, seek emergency care immediately (call 999).</span>
         </div>
       </div>
 
       <div class="search-card">
-        <div class="search-label">What healthcare service do you need?</div>
-        <textarea id="userQuery" rows="2" placeholder="e.g. I need HIV testing near me, or My child has had a high fever for three days…"></textarea>
+        <div class="search-label" id="searchLabel">What healthcare service do you need?</div>
+        <div class="query-wrap">
+          <textarea id="userQuery" rows="2" placeholder="e.g. I need HIV testing near me, or My child has had a high fever for three days…"></textarea>
+          <button type="button" class="btn-voice" id="btnVoice" title="Speak" aria-label="Speak your need">
+            <svg class="voice-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+            <span class="voice-pulse" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="voice-hint" id="voiceHint"></p>
         <div class="examples">
           <button type="button" class="example-chip" data-q="I need HIV testing">HIV testing</button>
           <button type="button" class="example-chip" data-q="Family planning services">Family planning</button>
@@ -73,9 +84,7 @@
           </div>
           <div class="filter-group">
             <label for="countySelect">County (optional)</label>
-            <select id="countySelect">
-              <option value="">Any county</option>
-            </select>
+            <select id="countySelect"><option value="">Any county</option></select>
           </div>
           <div class="filter-group">
             <label for="distanceSelect">Search distance</label>
@@ -93,7 +102,7 @@
       <div class="primary-action">
         <button type="button" class="btn btn-primary" id="btnSearch" disabled>
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Find suitable facilities
+          <span id="btnSearchText">Find suitable facilities</span>
         </button>
       </div>
       <div class="data-status" id="dataStatus">Loading facility data and taxonomy…</div>
@@ -101,41 +110,39 @@
 
     <div class="loading-state" id="loadingState">
       <div class="spinner"></div>
-      <div class="loading-text">Matching your request to facilities…</div>
-      <div class="loading-sub">Using the health-need taxonomy and facility capability data</div>
+      <div class="loading-text" id="loadingText">Matching your request to facilities…</div>
+      <div class="loading-sub" id="loadingSub">Using the health-need taxonomy and facility capability data</div>
     </div>
 
     <div class="emergency-notice" id="emergencyNotice">
-      <strong>Emergency situation detected</strong>
-      <p>If this is a life-threatening emergency, call 999 or go to the nearest hospital immediately. The facilities below may still help, but do not delay emergency care.</p>
+      <strong id="emergencyTitle">Emergency situation detected</strong>
+      <p id="emergencyText">If this is a life-threatening emergency, call 999 or go to the nearest hospital immediately. The facilities below may still help, but do not delay emergency care.</p>
     </div>
 
     <section class="results-section" id="resultsSection">
       <button type="button" class="back-link" onclick="resetApp()">
         <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        New search
+        <span id="newSearchText">New search</span>
       </button>
       <div class="recommendation-summary" id="recommendationSummary"></div>
       <div id="facilityList"></div>
       <div class="map-section" id="mapSection">
-        <div class="map-header">
-          <h3>Nearby facilities on map</h3>
-        </div>
+        <div class="map-header"><h3 id="mapTitle">Nearby facilities on map</h3></div>
         <div id="map"></div>
       </div>
     </section>
 
     <div class="empty-state" id="emptyState">
       <div class="empty-icon">🏥</div>
-      <h3>No suitable facilities found</h3>
-      <p>We couldn’t find matching facilities within the selected area. Try increasing the search distance or choosing a different county.</p>
-      <button type="button" class="btn btn-secondary" onclick="resetApp()">Adjust search</button>
+      <h3 id="noResultsTitle">No suitable facilities found</h3>
+      <p id="noResultsText">We couldn’t find matching facilities within the selected area. Try increasing the search distance or choosing a different county.</p>
+      <button type="button" class="btn btn-secondary" id="adjustSearchBtn" onclick="resetApp()">Adjust search</button>
     </div>
 
     <div class="error-state" id="errorState">
       <div class="empty-icon">⚠️</div>
-      <h3>Something went wrong</h3>
-      <p>We couldn’t complete the search right now. Please try again.</p>
+      <h3 id="errorTitle">Something went wrong</h3>
+      <p id="errorText">We couldn’t complete the search right now. Please try again.</p>
       <button type="button" class="btn btn-secondary" id="btnRetry">Try again</button>
     </div>
   </main>
@@ -145,10 +152,7 @@
     Not a diagnostic service · Always verify details with the facility · Data may change
   </footer>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-
-  <!-- App logic -->
   <script src="app.js"></script>
 </body>
 </html>
