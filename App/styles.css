@@ -740,36 +740,13 @@ select:focus {
   flex-wrap: wrap;
 }
 
-/* Map */
-.map-section {
-  margin-top: 1.6rem;
-  display: none;
-  animation: fadeUp 0.4s ease;
-}
 
-.map-section.active { display: block; }
 
-.map-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.65rem;
-}
 
-.map-header h3 {
-  font-size: 1rem;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-}
 
-#map {
-  height: 300px;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-  z-index: 1;
-}
+
+
+
 
 /* Empty / Error */
 .empty-state,
@@ -888,5 +865,5 @@ select:focus {
   }
   .location-full { grid-column: 1 / -1; }
   .facility-details { grid-template-columns: 1fr 1fr 1fr; }
-  #map { height: 380px; }
+  
 }

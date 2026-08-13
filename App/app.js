@@ -1,12 +1,11 @@
 /* ============================================================
    AfyaGuide – Recommendation engine + UI logic
-   Features: real data, EN/SW toggle, map + Get Directions
+   Features: real data, EN/SW toggle, voice input, Get Directions
    ============================================================ */
 
 let TAXONOMY = [];
 let FACILITIES = [];
 let userLocation = null;
-let map = null;
 let dataReady = false;
 let currentLang = localStorage.getItem('afyaguide_lang') || 'en';
 
@@ -264,7 +263,6 @@ function applyLanguage() {
   if ($('emergencyTitle')) $('emergencyTitle').textContent = t('emergencyTitle');
   if ($('emergencyText')) $('emergencyText').textContent = t('emergencyText');
   if ($('newSearchText')) $('newSearchText').textContent = t('newSearch');
-  if ($('mapTitle')) $('mapTitle').textContent = t('mapTitle');
   if ($('noResultsTitle')) $('noResultsTitle').textContent = t('noResultsTitle');
   if ($('noResultsText')) $('noResultsText').textContent = t('noResultsText');
   if ($('adjustSearchBtn')) $('adjustSearchBtn').textContent = t('adjustSearch');
@@ -310,7 +308,6 @@ const loadingState = $('loadingState');
 const resultsSection = $('resultsSection');
 const facilityList = $('facilityList');
 const recommendationSummary = $('recommendationSummary');
-const mapSection = $('mapSection');
 const emptyState = $('emptyState');
 const errorState = $('errorState');
 const emergencyNotice = $('emergencyNotice');
@@ -708,9 +705,6 @@ function renderResults(data) {
         </div>
       </div>
       <div class="card-actions">
-        <button type="button" class="btn btn-secondary btn-sm view-on-map" data-lat="${f.lat}" data-lng="${f.lng}">
-          ${t('viewOnMap')}
-        </button>
         <button type="button" class="btn btn-directions btn-sm get-directions" data-lat="${f.lat}" data-lng="${f.lng}" data-name="${(f.name || '').replace(/"/g, '&quot;')}">
           ${t('getDirections')}
         </button>
@@ -719,16 +713,6 @@ function renderResults(data) {
     `;
     facilityList.appendChild(card);
   });
-
-  renderMap(data.facilities);
-
-  document.querySelectorAll('.view-on-map').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lat = parseFloat(btn.dataset.lat);
-      const lng = parseFloat(btn.dataset.lng);
-      if (map && !isNaN(lat) && !isNaN(lng)) {
-        map.setView([lat, lng], 15);
-        mapSection.scrollIntoView({ behavior: 'smooth' });
       }
     });
   });
@@ -741,77 +725,6 @@ function renderResults(data) {
       if (!isNaN(lat) && !isNaN(lng)) openDirections(lat, lng, name);
     });
   });
-}
-
-/* ---------- Map ---------- */
-function renderMap(facilities) {
-  mapSection.classList.add('active');
-  if (map) {
-    map.remove();
-    map = null;
-  }
-
-  const center = userLocation
-    ? [userLocation.lat, userLocation.lng]
-    : (facilities.length ? [facilities[0].lat, facilities[0].lng] : [-1.2864, 36.8172]);
-
-  map = L.map('map').setView(center, userLocation ? 12 : 10);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-    maxZoom: 18
-  }).addTo(map);
-
-  if (userLocation) {
-    L.marker([userLocation.lat, userLocation.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: '<div style="background:#0d9488;width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 1px 6px rgba(0,0,0,0.35);"></div>',
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-      })
-    }).addTo(map).bindPopup(`<strong>${t('yourLocation')}</strong>`);
-  }
-
-  facilities.forEach((f, idx) => {
-    if (!f.lat || !f.lng) return;
-    const color = idx === 0 ? '#ea580c' : '#0d9488';
-    const marker = L.marker([f.lat, f.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
-      })
-    }).addTo(map);
-
-    const popupContent = `
-      <strong>${f.name}</strong><br>
-      ${f.type || ''}<br>
-      ${f.distance != null ? f.distance.toFixed(1) + ' km' : ''}<br>
-      <button type="button" class="popup-directions" data-lat="${f.lat}" data-lng="${f.lng}" data-name="${(f.name || '').replace(/"/g, '&quot;')}"
-        style="margin-top:6px;padding:4px 10px;border-radius:8px;border:none;background:#0d9488;color:white;font-size:12px;cursor:pointer;font-weight:600;">
-        ${t('getDirections')}
-      </button>
-    `;
-    marker.bindPopup(popupContent);
-
-    marker.on('popupopen', () => {
-      const btn = document.querySelector('.popup-directions');
-      if (btn) {
-        btn.onclick = () => openDirections(parseFloat(btn.dataset.lat), parseFloat(btn.dataset.lng), btn.dataset.name);
-      }
-    });
-  });
-
-  const points = [];
-  if (userLocation) points.push([userLocation.lat, userLocation.lng]);
-  facilities.forEach(f => {
-    if (f.lat && f.lng) points.push([f.lat, f.lng]);
-  });
-  if (points.length > 1) {
-    map.fitBounds(points, { padding: [40, 40], maxZoom: 13 });
-  }
 }
 
 /* ---------- Search ---------- */
@@ -873,10 +786,5 @@ function resetApp() {
   errorState.classList.remove('active');
   emergencyNotice.classList.remove('active');
   loadingState.classList.remove('active');
-  mapSection.classList.remove('active');
-  if (map) {
-    map.remove();
-    map = null;
-  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
