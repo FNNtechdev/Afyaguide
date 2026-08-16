@@ -5,3 +5,7 @@ seaborn
 scikit-learn
 jupyter
 openpyxl
+The Prototype WebApp
+https://17084f5c07ab78dd91.gradio.live
+The website we are building 
+https://afyaguide.vercel.app/
